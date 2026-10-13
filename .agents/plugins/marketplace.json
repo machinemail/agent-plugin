@@ -1,0 +1,20 @@
+{
+  "name": "machinemail",
+  "interface": {
+    "displayName": "MachineMail"
+  },
+  "plugins": [
+    {
+      "name": "machinemail",
+      "source": {
+        "source": "local",
+        "path": "./"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

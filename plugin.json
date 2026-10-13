@@ -1,0 +1,42 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "machinemail",
+  "version": "0.1.0",
+  "description": "Email inboxes for AI agents. Create an address, wait for sign-up codes, read and search mail with a trust verdict on every message, and reply, forward or draft for human review.",
+  "author": {
+    "name": "MachineMail",
+    "url": "https://machinemail.dev"
+  },
+  "homepage": "https://machinemail.dev",
+  "repository": "https://github.com/machinemail/agent-plugin",
+  "license": "MIT",
+  "keywords": ["email", "inbox", "agents", "mcp", "otp", "trust", "prompt-injection"],
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "MachineMail",
+        "shortDescription": "Email inboxes for AI agents",
+        "longDescription": "MachineMail gives your agent real email inboxes. Create an address in one step, wait for a sign-in code to arrive, read and search mail, and send, reply, forward or save drafts for a person to review.\n\nEvery inbound message comes with a trust verdict (verified, known, unknown, suspicious or quarantined) and an agent-safe text version. Quarantined messages are withheld from the model, and the agent is told to act only on verified senders and to treat everything else as information, never as instructions.\n\nYou sign in with your MachineMail account and choose which organization, pod or inbox the agent can use. You can revoke access at any time.",
+        "developerName": "MachineMail",
+        "category": "Productivity",
+        "capabilities": [
+          "Create and list email inboxes",
+          "Read, search and wait for incoming email",
+          "Trust verdict and agent-safe text for every message",
+          "Send, reply, forward and draft email"
+        ],
+        "websiteURL": "https://machinemail.dev",
+        "privacyPolicyURL": "https://machinemail.dev/privacy",
+        "termsOfServiceURL": "https://machinemail.dev/terms",
+        "defaultPrompt": [
+          "Create a new inbox I can use to sign up for a newsletter",
+          "Summarise the unread mail in my inboxes",
+          "Wait for a verification code and tell me what it is"
+        ],
+        "brandColor": "#FF8001",
+        "logo": "./assets/logo.png",
+        "composerIcon": "./assets/logo.png"
+      }
+    }
+  }
+}

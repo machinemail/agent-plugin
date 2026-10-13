@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "machinemail": {
+      "type": "http",
+      "url": "https://mcp.machinemail.dev/mcp"
+    }
+  }
+}

@@ -1,0 +1,49 @@
+name: Validate plugin
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: plugin
+
+      # The JSON Schemas published with the Agent Plugins Specification, at the version plugin.json targets.
+      - uses: actions/checkout@v4
+        with:
+          repository: agentplugins/agent-plugins-spec
+          ref: v1.0.0
+          path: spec
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - uses: astral-sh/setup-uv@v6
+
+      - name: Validate plugin.json against the v1.0.0 manifest schema
+        run: npx -y ajv-cli@5.0.0 validate --spec=draft2020 --strict=false -s spec/schemas/1.0.0/plugin.schema.json -d plugin/plugin.json
+
+      - name: Validate mcp.json against the v1.0.0 MCP schema
+        run: npx -y ajv-cli@5.0.0 validate --spec=draft2020 --strict=false -s spec/schemas/1.0.0/mcp.schema.json -d plugin/mcp.json
+
+      - name: Validate each skill against the Agent Skills specification
+        working-directory: plugin
+        run: |
+          status=0
+          for skill in skills/*/; do
+            uvx --from 'git+https://github.com/agentskills/agentskills@69ef37e9424c0a7ea9dd2293b559e43ec8176379#subdirectory=skills-ref' skills-ref validate "$skill" || status=1
+          done
+          exit $status
+
+      - name: Check spec rules the schemas cannot express
+        run: node plugin/scripts/check.mjs plugin
