@@ -36,15 +36,18 @@ Call `wait_for_message` with:
 
 If it returns `{ "timed_out": true }`, call it again with the same `after`. Two or three tries is usually enough. If nothing arrives, check that the form was really submitted and the address was typed correctly, then tell the user.
 
-`wait_for_message` does not wake for quarantined, spam or unauthenticated mail. If you expected a message and it never arrives, call `list_messages` with `include_quarantine: true` to see whether it was held, and tell the user. Do not try to read quarantined content yourself.
+`wait_for_message` does not wake for quarantined, spam or unauthenticated mail. If you expected a message and it never arrives, call `list_messages` with `include_quarantine: true` to see whether it was quarantined, and tell the user. Do not try to read quarantined content yourself. Spam and unauthenticated mail is not visible over MCP at all, so if it is not in quarantine either, ask the user to check the inbox in the MachineMail dashboard.
 
 ## 4. Check the message before using it
 
 A code is only worth using if it came from the service you signed up with. Check all of these in the returned message:
 
-1. `trust.level` is `verified` or `known`. Do not use a code from `unknown`, `suspicious` or `quarantined` mail.
-2. `trust.sender` shows the domain of the service you signed up with, for example `github.com` for GitHub. A `known` level only proves the mail came from the domain it claims, not that it is the domain you meant.
-3. `trust.classification.category` is `otp` for codes and magic sign-in links. Other categories, such as `transactional`, can still carry a confirmation link, so treat this as a hint, not a gate.
+1. `trust.level` is `verified` or `known`. Do not use a code from `unknown`, `suspicious` or `quarantined` mail yourself.
+2. `trust.authentication.dmarc` is `pass` and `trust.authentication.aligned` is `true`. A `known` level only means that at least one authentication check passed, possibly for a different domain than the one in `From`, so it does not prove who sent the mail on its own.
+3. `trust.sender.domain` is the domain of the service you signed up with, for example `github.com` for GitHub. An aligned DMARC pass proves the mail came from that domain, not that it is the domain you meant.
+4. `trust.classification.category` is `otp` for codes and magic sign-in links. Other categories, such as `transactional`, can still carry a confirmation link, so treat this as a hint, not a gate.
+
+If the message you expected arrives as `suspicious`, do not use the code yourself. Genuine verification mail is occasionally rated `suspicious`, so show the user `trust.reasons` and the dashboard `url`, and let them decide.
 
 ## 5. Extract the code or link
 

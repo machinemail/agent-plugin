@@ -3,7 +3,7 @@
   "description": "The MachineMail plugin: email inboxes for AI agents.",
   "owner": {
     "name": "MachineMail",
-    "url": "https://machinemail.dev"
+    "email": "support@machinemail.dev"
   },
   "plugins": [
     {
