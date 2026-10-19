@@ -25,6 +25,9 @@ const inside = (p) => {
 const SPEC = '1.0.0';
 const PLUGIN_SCHEMA = `https://agent-plugins.org/schemas/${SPEC}/plugin.schema.json`;
 const MCP_SCHEMA = `https://agent-plugins.org/schemas/${SPEC}/mcp.schema.json`;
+// Skills from https://github.com/machinemail/skills that are not bundled here but that the
+// bundled skills may refer to by name. The README links to that repository.
+const COMPANION_SKILLS = new Set(['machinemail', 'machinemail-mcp', 'machinemail-agent-signup', 'machinemail-agentmail-migration']);
 
 // Manifest
 const plugin = readJson('plugin.json');
@@ -95,8 +98,11 @@ if (existsSync(skillsDir)) {
     if (!/^description:\s*\S/m.test(fm[1])) fail(`skills/${d}/SKILL.md: description is required`);
     const lines = src.split('\n').length;
     if (lines > 500) fail(`skills/${d}/SKILL.md: ${lines} lines; keep it under 500`);
-    // Links to other skills by name must point at a skill in this plugin
-    for (const m of src.matchAll(/the `([a-z0-9-]+)` skill/g)) if (!existsSync(join(skillsDir, m[1], 'SKILL.md'))) fail(`skills/${d}/SKILL.md: refers to missing skill ${m[1]}`);
+    // Links to other skills by name must point at a skill in this plugin, or at one of the
+    // companion skills published in https://github.com/machinemail/skills (linked from the README)
+    for (const m of src.matchAll(/the `([a-z0-9-]+)` skill/g)) {
+      if (!existsSync(join(skillsDir, m[1], 'SKILL.md')) && !COMPANION_SKILLS.has(m[1])) fail(`skills/${d}/SKILL.md: refers to missing skill ${m[1]}`);
+    }
     skillNames.push(d);
   }
 }

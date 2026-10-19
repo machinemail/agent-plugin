@@ -16,18 +16,20 @@ The plugin follows the [Agent Plugins Specification v1.0.0](https://github.com/a
 | --- | --- | --- |
 | Manifest | [`plugin.json`](plugin.json) | Name, version and metadata (Agent Plugins v1.0.0) |
 | MCP server | [`mcp.json`](mcp.json) | The hosted MachineMail server, `https://mcp.machinemail.dev/mcp`, over Streamable HTTP |
-| Skill | [`read-email-safely`](skills/read-email-safely/SKILL.md) | The trust model: which field to read and what the agent may do at each trust level |
-| Skill | [`receive-verification-code`](skills/receive-verification-code/SKILL.md) | Get an address, sign up for a service and pick up the OTP code or magic link |
+| Skill | [`read-email-safely`](skills/read-email-safely/SKILL.md) | The trust model: which field to read, what the agent may do at each trust level, and the warning signs in a trust report |
+| Skill | [`receive-verification-code`](skills/receive-verification-code/SKILL.md) | Get an address, sign up for a service, and check that the OTP code or magic link really came from it before using it |
 | Skill | [`triage-inbox`](skills/triage-inbox/SKILL.md) | Read-only digest of an inbox, grouped by trust level, with proposed next steps |
 | Skill | [`reply-and-draft`](skills/reply-and-draft/SKILL.md) | Reply, forward or compose, and decide when to save a draft for review instead of sending |
-| Skill | [`register-agent-inbox`](skills/register-agent-inbox/SKILL.md) | Self-register an agent inbox over HTTP with [auth.md](https://machinemail.dev/auth.md), then have a person claim it |
+| Skill | [`register-agent-inbox`](skills/register-agent-inbox/SKILL.md) | Pick the quickest way to an inbox: `create_inbox` when signed in, an API key, or self-registration with [auth.md](https://api.machinemail.dev/auth.md) and a claim by a person |
+
+The skills here are the MCP task skills. They are maintained in [machinemail/skills](https://github.com/machinemail/skills), where they sit next to the companion skills they mention but this plugin does not bundle: `machinemail` (the REST API and the full trust reference), `machinemail-mcp` (connecting the MCP server) and `machinemail-agent-signup` (the full auth.md protocol). To add those to an agent, install them with the skills CLI, for example `npx skills add machinemail/skills --skill machinemail`, or browse them on [skills.sh](https://skills.sh/machinemail/skills).
 
 ### MCP tools
 
 Once connected, the MachineMail server provides these tools:
 
 - **Inboxes:** `list_inboxes`, `create_inbox`
-- **Reading:** `list_threads`, `get_thread`, `list_messages`, `get_message`, `search_messages`, `get_trust_report`, `wait_for_message`, `update_labels`
+- **Reading:** `list_threads`, `get_thread`, `list_messages`, `get_message`, `search_messages`, `get_trust_report`, `get_attachment`, `wait_for_message`, `update_labels`
 - **Writing:** `send_message`, `reply_to_message`, `forward_message`, `create_draft`, `send_draft`
 
 It also offers a `triage_inbox` prompt and resources for inboxes and threads. See the [MCP tools reference](https://machinemail.dev/docs/reference/mcp-tools).
@@ -141,7 +143,8 @@ node scripts/check.mjs
 - MachineMail: https://machinemail.dev
 - Documentation: https://machinemail.dev/docs/ (every page is also Markdown; index at https://machinemail.dev/docs/llms.txt)
 - MCP server: https://machinemail.dev/docs/agents/mcp
-- Agent self-registration: https://machinemail.dev/auth.md
+- Agent self-registration: https://api.machinemail.dev/auth.md
+- All MachineMail skills: https://github.com/machinemail/skills (also on [skills.sh](https://skills.sh/machinemail/skills))
 - Agent Plugins Specification: https://agent-plugins.org
 - Agent Skills Specification: https://agentskills.io/specification
 - Support: support@machinemail.dev, or open an issue in this repository

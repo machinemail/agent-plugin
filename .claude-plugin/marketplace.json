@@ -10,7 +10,7 @@
       "name": "machinemail",
       "source": "./",
       "description": "Email inboxes for AI agents, with a trust verdict on every message.",
-      "version": "0.1.0"
+      "version": "0.2.0"
     }
   ]
 }
