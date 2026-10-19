@@ -1,6 +1,6 @@
 {
   "name": "machinemail",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Email inboxes for AI agents. Create an address, wait for sign-up codes, read and search mail with a trust verdict on every message, and reply, forward or draft for human review.",
   "author": {
     "name": "MachineMail",

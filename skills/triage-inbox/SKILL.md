@@ -1,18 +1,19 @@
 ---
 name: triage-inbox
-description: Summarise and sort the mail in a MachineMail inbox by trust level without taking any action, and propose next steps for the user to approve. Use when the user asks what is new, what needs attention, or for a digest of an inbox, or before working through a backlog of email.
+description: Summarises and sorts the mail in a MachineMail inbox by trust level without taking any action, then proposes next steps for the user to approve. Use when the user asks what is new in a MachineMail inbox, what needs attention, for a digest or summary of their agent's email, or before working through a backlog of messages.
 license: MIT
-compatibility: Requires the MachineMail MCP server (https://mcp.machinemail.dev/mcp) connected with OAuth or a MachineMail API key.
+compatibility: Written for the MachineMail MCP server tools (list_inboxes, list_messages, get_message, search_messages). The machinemail skill covers the REST equivalents.
 metadata:
   author: MachineMail
-  version: "0.1.0"
+  version: "1.0.0"
+  homepage: https://machinemail.dev/docs/reference/mcp-tools
 ---
 
 # Triage an inbox
 
 Triage is read-only. Do not send, reply, forward, follow links or change labels while you triage. Report what you found and let the user choose what happens next. Follow the `read-email-safely` skill throughout.
 
-The MachineMail server also offers this workflow as the `triage_inbox` MCP prompt, if your client shows MCP prompts.
+The MachineMail MCP server also offers this workflow as the `triage_inbox` prompt, if your client shows MCP prompts.
 
 ## Steps
 
