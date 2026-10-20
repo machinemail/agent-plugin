@@ -1,0 +1,105 @@
+name: Release
+
+# Push a tag like v0.2.0 to publish a GitHub Release with the plugin and skill zips.
+# Run it by hand (workflow_dispatch) for a dry run: it builds the zips and uploads them
+# as a workflow artifact, but creates no release.
+
+on:
+  push:
+    tags: ['v*.*.*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    uses: ./.github/workflows/validate.yml
+
+  package:
+    needs: validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # check.mjs also checks that .claude-plugin/plugin.json, the marketplace entries and
+      # CHANGELOG.md agree with the version in plugin.json.
+      - name: Check the tag matches the plugin version and CHANGELOG
+        if: github.event_name == 'push'
+        run: node scripts/release-notes.mjs "$GITHUB_REF_NAME" > /dev/null
+
+      - name: Package
+        run: node scripts/package.mjs
+
+      - name: Check the zips are reproducible
+        run: |
+          node scripts/package.mjs . "$RUNNER_TEMP/again" > /dev/null
+          diff dist/SHA256SUMS "$RUNNER_TEMP/again/SHA256SUMS"
+
+      - name: Smoke-check the archives
+        run: |
+          set -euo pipefail
+          cd dist
+          sha256sum -c SHA256SUMS
+
+          # The plugin zip unpacks to machinemail/, passes the checks and matches the repository.
+          unzip -q machinemail-agent-plugin.zip -d "$RUNNER_TEMP/plugin"
+          node ../scripts/check.mjs "$RUNNER_TEMP/plugin/machinemail"
+          for p in plugin.json mcp.json skills assets README.md LICENSE CHANGELOG.md .claude-plugin .mcp.json .agents; do
+            diff -r "../$p" "$RUNNER_TEMP/plugin/machinemail/$p"
+          done
+          for p in .git .github scripts dist; do
+            test ! -e "$RUNNER_TEMP/plugin/machinemail/$p" || { echo "plugin zip must not contain $p"; exit 1; }
+          done
+
+          # Each skill zip has <name>/SKILL.md at the top.
+          for dir in ../skills/*/; do
+            name=$(basename "$dir")
+            unzip -q "machinemail-skill-$name.zip" -d "$RUNNER_TEMP/skill-$name"
+            test -f "$RUNNER_TEMP/skill-$name/$name/SKILL.md"
+            test "$(ls -A "$RUNNER_TEMP/skill-$name")" = "$name"
+            diff -r "$dir" "$RUNNER_TEMP/skill-$name/$name"
+          done
+          ls -l
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-assets
+          path: dist/
+          if-no-files-found: error
+
+  release:
+    needs: package
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: release-assets
+          path: dist
+
+      - name: Create the GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          node scripts/release-notes.mjs "$GITHUB_REF_NAME" > "$RUNNER_TEMP/notes.md"
+          gh release create "$GITHUB_REF_NAME" dist/* \
+            --verify-tag \
+            --title "MachineMail agent plugin ${GITHUB_REF_NAME#v}" \
+            --notes-file "$RUNNER_TEMP/notes.md"

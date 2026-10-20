@@ -92,6 +92,30 @@ Kiro, Hermes Agent, OpenClaw, Grok Bot, NanoClaw and OpenHands also load Agent P
 
 Without plugin support you can still connect the MCP server directly at `https://mcp.machinemail.dev/mcp`, with OAuth or a MachineMail API key. The [client setup guide](https://machinemail.dev/docs/agents/clients) covers more than a dozen clients. You won't get the skills that way, but the server repeats the core trust rules in its own instructions.
 
+## Download
+
+Each [release](https://github.com/machinemail/agent-plugin/releases) has the plugin and each skill as a zip. These links always get the latest release:
+
+| File | What it is |
+| --- | --- |
+| [machinemail-agent-plugin.zip](https://github.com/machinemail/agent-plugin/releases/latest/download/machinemail-agent-plugin.zip) | The whole plugin, in a `machinemail/` folder |
+| [machinemail-skill-read-email-safely.zip](https://github.com/machinemail/agent-plugin/releases/latest/download/machinemail-skill-read-email-safely.zip) | The `read-email-safely` skill |
+| [machinemail-skill-receive-verification-code.zip](https://github.com/machinemail/agent-plugin/releases/latest/download/machinemail-skill-receive-verification-code.zip) | The `receive-verification-code` skill |
+| [machinemail-skill-triage-inbox.zip](https://github.com/machinemail/agent-plugin/releases/latest/download/machinemail-skill-triage-inbox.zip) | The `triage-inbox` skill |
+| [machinemail-skill-reply-and-draft.zip](https://github.com/machinemail/agent-plugin/releases/latest/download/machinemail-skill-reply-and-draft.zip) | The `reply-and-draft` skill |
+| [machinemail-skill-register-agent-inbox.zip](https://github.com/machinemail/agent-plugin/releases/latest/download/machinemail-skill-register-agent-inbox.zip) | The `register-agent-inbox` skill |
+| [SHA256SUMS](https://github.com/machinemail/agent-plugin/releases/latest/download/SHA256SUMS) | Checksums. Check your download with `sha256sum -c SHA256SUMS --ignore-missing` |
+| [manifest.json](https://github.com/machinemail/agent-plugin/releases/latest/download/manifest.json) | Version, tag, commit, and each file's size and sha256 |
+
+The file names have no version in them. The version is in the release tag and in `manifest.json`.
+
+Installing from the repository, as described under [Install](#install), is usually simpler and lets your client update the plugin. Use the zips when you want a fixed copy, or when the client has no way to install from GitHub:
+
+- **Claude Code:** unzip `machinemail-agent-plugin.zip`, then run `claude plugin marketplace add ./machinemail` and `claude plugin install machinemail@machinemail`. The `machinemail/` folder is a marketplace that lists the plugin itself.
+- **Codex:** unzip the plugin, then run `codex plugin marketplace add ./machinemail` and install MachineMail from the Plugins Directory.
+- **claude.ai and Claude Desktop:** go to **Customize > Skills**, choose **+**, then **Create skill > Upload a skill**, and upload a `machinemail-skill-<name>.zip`. Upload each skill you want. The skills call the MachineMail MCP tools, so also add `https://mcp.machinemail.dev/mcp` as a custom connector.
+- **Other Agent Plugins clients:** unzip the plugin and point the client at the `machinemail/` folder, which is the plugin root. For Cursor, unzip it into `~/.cursor/plugins/local/`.
+
 ## Security model
 
 All inbound email is untrusted third-party input: anyone can write to an inbox, and a message can contain text designed to look like instructions. MachineMail and this plugin handle that in layers:
@@ -115,7 +139,10 @@ assets/logo.png                Logo, used by the com.openai extension in plugin.
 .mcp.json                      Claude Code MCP configuration
 .agents/plugins/               Codex marketplace catalog
 scripts/check.mjs              Spec checks the JSON Schemas cannot express
+scripts/package.mjs            Builds the release zips in dist/
+scripts/release-notes.mjs      Release notes from CHANGELOG.md
 .github/workflows/validate.yml CI validation
+.github/workflows/release.yml  Publishes a GitHub Release for each v*.*.* tag
 ```
 
 Only `plugin.json`, `mcp.json` and `skills/` belong to the portable package. The `com.openai` entry under `extensions` holds display metadata for ChatGPT and Codex; other clients ignore it. The marketplace and Claude Code files are distribution and compatibility metadata outside the specification.
@@ -126,7 +153,7 @@ Every push and pull request runs [the validation workflow](.github/workflows/val
 
 1. `plugin.json` and `mcp.json` against the official [v1.0.0 JSON Schemas](https://github.com/agentplugins/agent-plugins-spec/tree/v1.0.0/schemas/1.0.0).
 2. Each skill with `skills-ref validate` from the [Agent Skills reference library](https://github.com/agentskills/agentskills).
-3. `scripts/check.mjs`, for rules the schemas cannot express: skill names match their directories, the MCP `$schema` version matches the manifest, remote URLs use HTTPS without credentials, plugin-relative paths stay inside the package, the compatibility files agree with `plugin.json`, and nothing that looks like a credential is committed.
+3. `scripts/check.mjs`, for rules the schemas cannot express: skill names match their directories, the MCP `$schema` version matches the manifest, remote URLs use HTTPS without credentials, plugin-relative paths stay inside the package, the compatibility files and `CHANGELOG.md` agree with the version in `plugin.json`, and nothing that looks like a credential is committed.
 
 To run the same checks locally:
 
@@ -137,6 +164,10 @@ npx -y ajv-cli@5.0.0 validate --spec=draft2020 --strict=false -s /tmp/agent-plug
 for s in skills/*/; do uvx --from 'git+https://github.com/agentskills/agentskills@69ef37e9424c0a7ea9dd2293b559e43ec8176379#subdirectory=skills-ref' skills-ref validate "$s"; done
 node scripts/check.mjs
 ```
+
+## Releasing
+
+See [RELEASING.md](RELEASING.md).
 
 ## Links
 

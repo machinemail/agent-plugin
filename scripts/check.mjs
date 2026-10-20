@@ -130,11 +130,19 @@ for (const p of ['.claude-plugin/marketplace.json', '.agents/plugins/marketplace
   else if (entry.version !== undefined && entry.version !== plugin.version) fail(`${p}: version differs from plugin.json`);
 }
 
+// Every version in plugin.json has a CHANGELOG section and link reference
+if (plugin && existsSync(join(root, 'CHANGELOG.md'))) {
+  const changelog = readFileSync(join(root, 'CHANGELOG.md'), 'utf8');
+  const v = plugin.version.replaceAll('.', '\\.');
+  if (!new RegExp(`^## \\[${v}\\] - \\d{4}-\\d{2}-\\d{2}$`, 'm').test(changelog)) fail(`CHANGELOG.md: no "## [${plugin.version}] - YYYY-MM-DD" section`);
+  if (!new RegExp(`^\\[${v}\\]: https://`, 'm').test(changelog)) fail(`CHANGELOG.md: no [${plugin.version}] link reference`);
+}
+
 // No credentials anywhere in the package
 const secretPatterns = [/mm_live_[A-Za-z0-9]{32}/, /gh[pousr]_[A-Za-z0-9]{36}/, /github_pat_[A-Za-z0-9_]{20,}/, /-----BEGIN [A-Z ]*PRIVATE KEY-----/];
 const walk = (dir) => {
   for (const e of readdirSync(dir, { withFileTypes: true })) {
-    if (e.name === '.git' || e.name === 'node_modules') continue;
+    if (e.name === '.git' || e.name === 'node_modules' || e.name === 'dist') continue;
     const p = join(dir, e.name);
     if (e.isSymbolicLink() && !inside(p)) fail(`${relative(root, p)}: symlink resolves outside the plugin root`);
     else if (e.isDirectory()) walk(p);

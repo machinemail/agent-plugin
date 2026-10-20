@@ -2,7 +2,13 @@
 
 All notable changes to this plugin are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the plugin uses [Semantic Versioning](https://semver.org/).
 
-## [0.2.0] - 2026-10-19
+## [0.2.0] - 2026-10-20
+
+### Added
+
+- Downloadable zips on each [GitHub Release](https://github.com/machinemail/agent-plugin/releases): `machinemail-agent-plugin.zip` with the whole plugin, and one `machinemail-skill-<name>.zip` per skill for upload to claude.ai and Claude Desktop, with `SHA256SUMS` and `manifest.json`. The file names carry no version, so `releases/latest/download/<file>` always gets the latest release.
+- A release workflow (`.github/workflows/release.yml`) that runs on `v*.*.*` tags, and `scripts/package.mjs`, which builds the zips reproducibly.
+- `scripts/check.mjs` also checks that `CHANGELOG.md` has a section for the version in `plugin.json`.
 
 ### Changed
 
@@ -19,5 +25,5 @@ All notable changes to this plugin are documented here. The format follows [Keep
 - Claude Code compatibility files (`.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`, `.mcp.json`) and a Codex marketplace catalog (`.agents/plugins/marketplace.json`).
 - CI that validates the manifest and MCP configuration against the v1.0.0 JSON Schemas, each skill with `skills-ref`, and the remaining spec rules with `scripts/check.mjs`.
 
-[0.2.0]: https://github.com/machinemail/agent-plugin/compare/ecaaeda...main
-[0.1.0]: https://github.com/machinemail/agent-plugin/commits/main
+[0.2.0]: https://github.com/machinemail/agent-plugin/compare/ecaaeda...v0.2.0
+[0.1.0]: https://github.com/machinemail/agent-plugin/tree/ecaaeda
